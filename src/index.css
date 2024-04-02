@@ -16,6 +16,9 @@ body {
   min-height: 100vh;
 }
 
+/*
+ * HEADER -------------------------------
+ */
 #main-header {
   display: flex;
   justify-content: space-between;
@@ -52,6 +55,9 @@ h1 {
   text-transform: uppercase;
 }
 
+/*
+ * MEALS -------------------------------
+ */
 #meals {
   width: 90%;
   max-width: 70rem;
@@ -109,6 +115,9 @@ h1 {
   margin-bottom: 1.5rem;
 }
 
+/*
+ * CART -------------------------------
+ */
 .cart h2 {
   margin: 1rem 0;
 }
@@ -119,6 +128,9 @@ h1 {
   padding: 0;
 }
 
+/*
+ * MODAL -------------------------------
+ */
 .modal-actions {
   display: flex;
   justify-content: flex-end;
