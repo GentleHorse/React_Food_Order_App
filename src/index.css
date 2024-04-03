@@ -118,8 +118,15 @@ h1 {
 /*
  * CART -------------------------------
  */
+
+ /* Added */ 
+.cart {
+  color: #46443c;  
+}
+
 .cart h2 {
   margin: 1rem 0;
+  font-weight: bold;  /* Added */
 }
 
 .cart ul {
@@ -128,9 +135,6 @@ h1 {
   padding: 0;
 }
 
-/*
- * MODAL -------------------------------
- */
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -192,6 +196,9 @@ h1 {
   color: #ffab04;
 }
 
+/*
+ * CONTROL -------------------------------
+ */
 .control {
   margin: 0.5rem 0;
   display: flex;
@@ -248,6 +255,9 @@ h1 {
   color: #ffab04;
 }
 
+/*
+ * MODAL -------------------------------
+ */
 .modal {
   background-color: #e4ddd4;
   border-radius: 6px;
