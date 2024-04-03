@@ -8,10 +8,10 @@ function App() {
     <main>
       <Header />
       <Meals />
-      
-      <Modal>
+
+      {/* <Modal>
         <Cart />
-      </Modal>
+      </Modal> */}
     </main>
   );
 }

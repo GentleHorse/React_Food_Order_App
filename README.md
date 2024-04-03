@@ -15,3 +15,15 @@ In order to run the application properly, you need to run both the backend. <br>
 - Frontend: `$ npm run dev`
 
 
+## 1. Objectives
+- Add components for displaying **products**, the **cart** (in a **modal**) and a **checkout form** (in a **modal**)
+- **Fetch** the (dummy) meals data from the **backend** and show it on the screen (GET/meals)
+- Allow users to **add & remove** products to / from the **cart**
+- **Send cart data** along with **user data** (full name, email, street, postal code, city) to the **backend** (POST/orders)
+- Handle **loading & error** states
+
+## 2. Planing
+1. Add the **Header** component
+2. Add the **Meals-related** components & the logic to fetch meals data from a **backend**
+3. Add **Cart** logic (add items to cart, edit cart items) & **Checkout** page logic
+
