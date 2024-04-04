@@ -5,10 +5,10 @@ import Modal from "./component/modal/Modal.jsx";
 
 function App() {
   return (
-    <main>
+    <>
       <Header />
       <Meals />
-    </main>
+    </>
   );
 }
 

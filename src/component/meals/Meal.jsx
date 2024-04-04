@@ -1,15 +1,17 @@
-export default function Meal({ img, title, price, description }) {
+export default function Meal({ meal }) {
   return (
-    <div className="meal-item">
+    <li className="meal-item">
       <article>
-        <img src={img}/>
-        <h3>{title}</h3>
-        <div className="meal-item-price">€{price}</div>
-        <div className="meal-item-description">{description}</div>
-        <div className="meal-item-actions">
-          <button>Add to Cart</button>
+        <img src={`http://localhost:3000/${meal.image}`} alt={meal.name} />
+        <div>
+          <h3>{meal.name}</h3>
+          <p className="meal-item-price">€{meal.price}</p>
+          <p className="meal-item-description">{meal.description}</p>
         </div>
+        <p className="meal-item-actions">
+          <button>Add to Cart</button>
+        </p>
       </article>
-    </div>
+    </li>
   );
 }

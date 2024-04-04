@@ -1,13 +1,15 @@
+import logoImg from "../../assets/logo.jpg"
+
 export default function Header() {
   return (
-    <header>
-      <div id="main-header">
-        <div id="title">
-          <img alt="hamburger illustration logo" src="./logo.jpg" />
-          <h1>Reactfood</h1>
-        </div>
-        <button>Cart (3)</button>
+    <header id="main-header">
+      <div id="title">
+        <img src={logoImg} alt="A restaurant" />
+        <h1>ReactFood</h1>
       </div>
+      <nav>
+        <button>Cart (0)</button>
+      </nav>
     </header>
   );
 }

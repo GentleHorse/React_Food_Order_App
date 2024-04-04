@@ -69,6 +69,9 @@ h1 {
   gap: 1rem;
 }
 
+/*
+ * MEAL --------------------------------
+ */
 .meal-item {
   background-color: #1d1a16;
   border-radius: 1rem;

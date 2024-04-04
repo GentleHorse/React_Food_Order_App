@@ -2,30 +2,35 @@ import { useState, useEffect } from "react";
 import Meal from "./Meal.jsx";
 
 export default function Meals() {
-  const [meals, setMeals] = useState([]);
+  const [loadedMeals, setLoadedMeals] = useState([]);
+  const [error, setError] = useState();
 
   useEffect(() => {
     async function fetchMeals() {
-      const response = await fetch("http://localhost:3000/meals");
-      const resData = await response.json();
+      try {
+        const response = await fetch("http://localhost:3000/meals");
+        const resData = await response.json();
 
-      setMeals(resData);
+        if (!response.ok) {
+          throw new Error("Failed to fetch meals");
+        }
+
+        setLoadedMeals(resData);
+      } catch (error) {
+        setError({
+          message: "Failed to fetch meals",
+        });
+      }
     }
 
     fetchMeals();
   }, []);
 
   return (
-    <div id="meals">
-      {meals.map((meal) => (
-        <Meal
-          key={meal.id}
-          img={`http://localhost:3000/${meal.image}`} // NOT "img={meal.image}" !!
-          title={meal.name}
-          price={meal.price}
-          description={meal.description}
-        />
+    <ul id="meals">
+      {loadedMeals.map((meal) => (
+        <Meal key={meal.id} meal={meal} />
       ))}
-    </div>
+    </ul>
   );
 }
