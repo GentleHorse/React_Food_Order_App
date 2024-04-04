@@ -1,34 +1,31 @@
+import { useState, useEffect } from "react";
 import Meal from "./Meal.jsx";
 
 export default function Meals() {
+  const [meals, setMeals] = useState([]);
+
+  useEffect(() => {
+    async function fetchMeals() {
+      const response = await fetch("http://localhost:3000/meals");
+      const resData = await response.json();
+
+      setMeals(resData);
+    }
+
+    fetchMeals();
+  }, []);
+
   return (
     <div id="meals">
-      <Meal
-        img="./logo.jpg"
-        title="Mac & Cheese"
-        price="8.99"
-        description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-        eiusmod tempor incididunt ut labore et dolore magna aliqua. Vitae
-        proin sagittis nisl rhoncus mattis rhoncus urna."
-      />
-
-      <Meal
-        img="./logo.jpg"
-        title="Margherita Pizza"
-        price="12.99"
-        description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-        eiusmod tempor incididunt ut labore et dolore magna aliqua. Vitae
-        proin sagittis nisl rhoncus mattis rhoncus urna."
-      />
-
-      <Meal
-        img="./logo.jpg"
-        title="Ceasar Salad"
-        price="7.99"
-        description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-        eiusmod tempor incididunt ut labore et dolore magna aliqua. Vitae
-        proin sagittis nisl rhoncus mattis rhoncus urna."
-      />
+      {meals.map((meal) => (
+        <Meal
+          key={meal.id}
+          img={`http://localhost:3000/${meal.image}`} // NOT "img={meal.image}" !!
+          title={meal.name}
+          price={meal.price}
+          description={meal.description}
+        />
+      ))}
     </div>
   );
 }
