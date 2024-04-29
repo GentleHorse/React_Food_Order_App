@@ -3,19 +3,21 @@
 ## 0. Set up
 
 ### 0-0. Install
+
 You need to install depedencies both for the front end and for the dummy back end. <br>
 
 - Backend: `/backend$ npm install`
 - Frontend: `$ npm install`
 
-## 0-1. Run application 
+## 0-1. Run application
+
 In order to run the application properly, you need to run both the backend. <br>
 
 - Backend: `/backend$ npm start`
 - Frontend: `$ npm run dev`
 
-
 ## 1. Objectives
+
 - Add components for displaying **products**, the **cart** (in a **modal**) and a **checkout form** (in a **modal**)
 - **Fetch** the (dummy) meals data from the **backend** and show it on the screen (GET/meals)
 - Allow users to **add & remove** products to / from the **cart**
@@ -23,11 +25,15 @@ In order to run the application properly, you need to run both the backend. <br>
 - Handle **loading & error** states
 
 ## 2. Planing
+
 1. Add the **Header** component
 2. Add the **Meals-related** components & the logic to fetch meals data from a **backend**
 3. Add **Cart** logic (add items to cart, edit cart items) & **Checkout** page logic
 
 ## 3. Creating the Header component
+
+![adding header component](./public/images/screenshots/adding-header.png)
+
 ```
 import logoImg from "../../assets/logo.jpg"
 
@@ -106,6 +112,7 @@ export default function Meals() {
 ### 4-1. Create the reuseable Meal component and replace contents
 
 **Meals.jsx**
+
 ```
 import Meal from "./Meal.jsx";
 
@@ -141,11 +148,12 @@ export default function Meals() {
     </ul>
   );
 }
-``` 
+```
 
 <br>
 
 **Meal.jsx**
+
 ```
 export default function Meal({ img, title, price, description }) {
   return (
@@ -165,6 +173,7 @@ export default function Meal({ img, title, price, description }) {
 ```
 
 ### 4-2. Replace hard coded data with the DUMMY array (`Meals.jsx`)
+
 ```
 const DUMMY_MEALS = [
   {
@@ -217,6 +226,7 @@ export default function Meals() {
 ### 4-3. Refactor the components (`Meals.jsx`, `Meal.jsx`)
 
 **Meals.jsx**
+
 ```
 const DUMMY_MEALS = [
   {
@@ -263,6 +273,7 @@ export default function Meals() {
 <br>
 
 **Meal.jsx**
+
 ```
 export default function Meal({ meal }) {
   return (
@@ -284,6 +295,8 @@ export default function Meal({ meal }) {
 ```
 
 ## 5. Add fetch meals data logic
+
+![fetching data from backend](./public/images/screenshots/fetching-data-from-backend.png)
 
 ### 5-0. Fetch data from backend (`Meals.jsx`)
 
@@ -313,6 +326,7 @@ export default function Meals() {
 ```
 
 ### 5-1. Fix the image url (`Meal.jsx`)
+
 If you don't specified the path, the image url is set to the relative path (`localhost:5137`) but actual images are stored in public which can be accessed with `localhost:3000` path. Thus, you need to change the image paths to this ones.
 
 ```
@@ -330,6 +344,41 @@ export default function Meal({ meal }) {
           <button>Add to Cart</button>
         </p>
       </article>
+    </li>
+  );
+}
+```
+
+## 6. Formatting & Outputting numbers as currency
+
+### 6-0. Create the reusable formatter
+
+Create a reusable currency formatter inside newly created "src > util" folder. In order to do so, employ the `Intl.NumberFormat` object and set the belgium country code (`sfb`) to put **€** before the number.
+
+```
+export const currencyFormatter = new Intl.NumberFormat("sfb", {
+  style: "currency",
+  currency: "EUR",
+});
+```
+
+### 6-1. Use it inside the component
+
+To use the formatter, employ the `format` method.
+
+```
+import { currencyFormatter } from "../../util/formatting";
+
+export default function Meal({ meal }) {
+  return (
+    <li className="meal-item">
+
+          ....
+
+          <p className="meal-item-price">{currencyFormatter.format(meal.price)}</p>
+
+          ....
+
     </li>
   );
 }
