@@ -383,3 +383,31 @@ export default function Meal({ meal }) {
   );
 }
 ```
+
+## 7. Creating a configurable & flexible custom button component
+![reusable button component](./public/images/screenshots/reusable-button-component.png)
+
+<br>
+
+To create reusable button component, you need to;
+
+- Enable to wrap the element via `children` prop
+- Enable to add classNames flexibly with `textOnly` prop
+- Enable to inherit the `className` which the wrapped component already has
+- Enable to use default `button` properties, use the spread operator (`...`)
+
+```
+export default function Button({ children, textOnly, className, ...props }) {
+  const cssClasses = textOnly ? `text-button ${className}` : "button";
+
+  return (
+    <button className={cssClasses} {...props}>
+      {children}
+    </button>
+  );
+}
+```
+
+
+
+
