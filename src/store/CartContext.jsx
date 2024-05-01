@@ -1,7 +1,7 @@
 import { createContext, useReducer } from "react";
 
 /**
- * CONTEXT
+ * CONTEXT OBJECT
  */
 const CartContext = createContext({
   items: [],

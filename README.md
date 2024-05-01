@@ -610,3 +610,67 @@ function App() {
 export default App;
 ```
 
+### 8-5. Use the cart context in `Meal.jsx`
+![use context in meal component](./public/images/screenshots/use-contex-in-meal-component.png)
+
+<br>
+
+```
+....
+
+import { useContext } from "react";
+import CartContext from "../../store/CartContext.jsx";
+
+export default function Meal({ meal }) {
+  const cartCtx = useContext(CartContext);
+
+  function handleAddMealToCart() {
+    cartCtx.addItem(meal);
+  }
+
+  return (
+    <li className="meal-item">
+
+      ....
+
+          <Button onClick={handleAddMealToCart}>Add to Cart</Button>
+        
+      ....
+
+    </li>
+  );
+}
+```
+
+### 8-6. Use the cart context in `Header.jsx`
+![use context in header component](./public/images/screenshots/use-contex-in-header-component.png)
+
+<br>
+
+```
+....
+
+import { useContext } from "react";
+import CartContext from "../../store/CartContext.jsx";
+
+export default function Header() {
+  const cartCtx = useContext(CartContext);
+
+  // reduce function reduces values in the array to a single value
+  const totalCartItems = cartCtx.items.reduce((totalNumberOfItems, item) => {
+    return totalNumberOfItems + item.quantity
+  }, 0);
+
+  return (
+    <header id="main-header">
+      <div id="title">
+        <img src={logoImg} alt="A restaurant" />
+        <h1>ReactFood</h1>
+      </div>
+      <nav>
+        <Button textOnly>Cart ({totalCartItems})</Button>
+      </nav>
+    </header>
+  );
+}
+```
