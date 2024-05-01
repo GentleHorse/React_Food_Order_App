@@ -479,6 +479,10 @@ export default CartContext;
  * REDUCER FUNCTION
  */
 function cartReducer(state, action) {
+
+  /**
+   * ADD AN ITEM
+   */
   if (action.type === "ADD_ITEM") {
     // Check if the added item already exists (A) in the cart or not (B)
     const existingCartItemIndex = state.items.findIndex(
@@ -511,8 +515,49 @@ function cartReducer(state, action) {
     return { ...state, items: updatedItems };
   }
 
+  ....
+
+  return state; // if nothing changed, return the original state
+}
+```
+
+### 8-3. Remove item logic
+```
+/**
+ * REDUCER FUNCTION
+ */
+function cartReducer(state, action) {
+  
+  ....
+
+  /**
+   * REMOVE AN ITEM
+   */
   if (action.type === "REMOVE_ITEM") {
-    // ..... remove an item from the state
+    // Find the targent item
+    const existingCartItemIndex = state.items.findIndex((item) => {
+      item.id === action.item.id;
+    });
+
+    // Copy the cart items
+    const updatedItems = [...state.items];
+
+    // The existing cart item
+    const existingItem = state.items[existingCartItemIndex];
+
+    // Check the target item quality is 1 or not
+    if (existingItem.quantity === 1) {
+      updatedItems.splice(existingCartItemIndex, 1);
+    } else {
+      const updatedItem = {
+        ...existingItem,
+        quantity: existingItem.quantity - 1,
+      };
+
+      updatedItems[existingCartItemIndex] = updatedItem;
+    }
+
+    return { ...state, items: updatedItems };
   }
 
   return state; // if nothing changed, return the original state
