@@ -54,7 +54,7 @@ function cartReducer(state, action) {
   if (action.type === "REMOVE_ITEM") {
     // Find the targent item
     const existingCartItemIndex = state.items.findIndex((item) => {
-      item.id === action.item.id;
+      item.id === action.id;
     });
 
     // Copy the cart items
@@ -85,9 +85,27 @@ function cartReducer(state, action) {
  * CONTEXT PROVIDER
  */
 export function CartContextProvider({ children }) {
-  useReducer(cartReducer, { items: [] });
+  // Set up reducer
+  const [cart, dispatchCartAction] = useReducer(cartReducer, { items: [] });
 
-  return <CartContext.Provider>{children}</CartContext.Provider>;
+  // The add & remove item functions
+  function addItem(item) {
+    dispatchCartAction({ type: "ADD_ITEM", item: item });
+  }
+  function removeItem(id) {
+    dispatchCartAction({ type: "REMOVE_ITEM", id: id });
+  }
+
+  // Cart context values
+  const cartContext = {
+    items: cart.items,
+    addItem: addItem,
+    removeItem: removeItem,
+  };
+
+  return (
+    <CartContext.Provider value={cartContext}>{children}</CartContext.Provider>
+  );
 }
 
 export default CartContext;
