@@ -703,6 +703,7 @@ export default function Modal({ children, open }) {
 ```
 
 ### 9-1. Adding the logic to control from outside the modal
+
 Let outside components to control `dialog` object built-in method, `showModal()` through `open` prop.
 
 ```
@@ -715,7 +716,7 @@ export default function Modal({ children, open }) {
   useEffect(() => {
     if(open){
       dialog.current.showModal();
-    } 
+    }
 
   }, [open])
 
@@ -726,7 +727,8 @@ export default function Modal({ children, open }) {
 }
 ```
 
-### 9-2. Flexible className 
+### 9-2. Flexible className
+
 By passing className through props and using template literals to define the class name, make the style of `dialog` object flexible. Note that you need to set the default `className` prop value otherwise it will cause error.
 
 ```
@@ -751,9 +753,10 @@ export default function Modal({ children, open, className = "" }) {
 }
 ```
 
-## 10. The cart component
+## 10. The cart modal component
 
 ### 10-0. Create the `Cart` component with the `Modal` component
+
 ```
 import Modal from "../UI/Modal.jsx";
 
@@ -767,6 +770,7 @@ export default function Cart() {
 ```
 
 ### 10-1. Accessing the cart context for showing the cart items
+
 ```
 import { createContext } from "react";
 import Modal from "../UI/Modal.jsx";
@@ -811,6 +815,7 @@ export default function Cart() {
 ```
 
 ### 10-2. Create a new context for managing the modal states
+
 This time the context is simple, so use `useState()` instead of `useReducer()`.
 
 ```
@@ -862,6 +867,7 @@ export default UserProgressContext;
 ```
 
 ### 10-3. Make the modal open by clicking the cart button
+
 ![open cart modal](./public/images/screenshots/open-cart-modal.png)
 
 <br>
@@ -876,7 +882,7 @@ To make the modal open on request of button clicking, you need to set up the mul
 
 ```
 export default function Header() {
-  
+
   ....
 
   const userProgressCtx = useContext(UserProgressContext);
@@ -898,7 +904,7 @@ export default function Header() {
         <Button textOnly onClick={handleShowCart}>
           Cart ({totalCartItems})
         </Button>
-      
+
       ....
 
     </header>
@@ -910,16 +916,16 @@ export default function Header() {
 
 ```
 export default function Cart() {
-  
+
   ....
 
-  const userProgressCtx = useContext(UserProgressContext); 
+  const userProgressCtx = useContext(UserProgressContext);
 
   ....
 
   return (
     <Modal className="cart" open={userProgressCtx.progress === "cart"}>
-      
+
       ....
 
     </Modal>
@@ -948,17 +954,17 @@ function App() {
 
 To make the modal close on request of button clicking, you need to set up the multiple components properly.
 
-0. `Cart` component - add the logic to trigger the `hideCart` method 
+0. `Cart` component - add the logic to trigger the `hideCart` method
 1. `Modal` component - properly set up the cleaning up step of `useEffect` hook
 
 #### 10-4-0. `Cart` component
 
 ```
 export default function Cart() {
-  
+
   ....
 
-  const userProgressCtx = useContext(UserProgressContext); 
+  const userProgressCtx = useContext(UserProgressContext);
 
   ....
 
@@ -971,7 +977,7 @@ export default function Cart() {
 
   return (
     <Modal className="cart" open={userProgressCtx.progress === "cart"}>
-      
+
       ....
 
       {/* ACTION BUTTONS */}
@@ -999,7 +1005,7 @@ export default function Modal({ children, open, className = "" }) {
       modal.showModal();
     }
 
-    return () => modal.close(); 
+    return () => modal.close();
   }, [open]);
 
 
@@ -1009,6 +1015,7 @@ export default function Modal({ children, open, className = "" }) {
 ```
 
 ## 11. The cart item component
+
 ![cart item component](./public/images/screenshots/cart-item-component.png)
 
 ### 11-0. Create the cart item component
@@ -1050,11 +1057,12 @@ export default function CartItem({ name, quantity, price }) {
 ### 11-2. Change quantities of items inside the cart
 
 - `CartItem` component - receiving `onIncrease` & `onDecrease` props
-- `Cart` component - handling the quantity change logics
+- `Cart` component - handling the quantity change logics with the cart context
 
 <br>
 
 **CartItem.jsx**
+
 ```
 export default function CartItem({
   ....
@@ -1063,7 +1071,7 @@ export default function CartItem({
 }) {
   return (
     <li className="cart-item">
-      
+
       ....
 
       <p className="cart-item-actions">
@@ -1079,12 +1087,13 @@ export default function CartItem({
 <br>
 
 **Cart.jsx**
+
 ```
 {/* MEALS */}
 <ul>
   {cartCtx.items.map((item) => (
     <CartItem
-      
+
       ....
 
       onIncrease={() => cartCtx.addItem(item)}
@@ -1094,5 +1103,173 @@ export default function CartItem({
 </ul>
 ```
 
+## 12. The checkout modal component
+![checkout modal component](./public/images/screenshots/checkout-modal-component.png)
+
+### 12-0. Create the `Checkout` component with the `Modal` component
+
+```
+import { useContext } from "react";
+import Modal from "../UI/Modal.jsx";
+import CartContext from "../../store/CartContext.jsx";
+import { currencyFormatter } from "../../util/formatting.js";
+
+export default function Checkout() {
+  /**
+   * CART CONTEXT
+   */
+  const cartCtx = useContext(CartContext);
+
+  /**
+   * TOTAL PRICE CALCULATION
+   */
+  const cartTotal = cartCtx.items.reduce((totalPrice, item) => {
+    return totalPrice + item.price * item.quantity;
+  }, 0);
+
+  return (
+    <Modal>
+      <form>
+        <h2>Checkout</h2>
+        <p>Total Amount: {currencyFormatter.format(cartTotal)}</p>
+      </form>
+    </Modal>
+  );
+}
+```
+
+### 12-1. Create a reusable `Input` component and use it inside `Checkout` component
+
+**Input.jsx**
+
+```
+export default function Input({ label, id, ...props }) {
+  return (
+    <p className="control">
+      <label htmlFor={id}>{label}</label>
+      <input id={id} name={id} required {...props} />
+    </p>
+  );
+}
+```
+
+<br>
+
+**Checkout.jsx**
+
+```
+<Modal>
+  <form>
+    <h2>Checkout</h2>
+    <p>Total Amount: {currencyFormatter.format(cartTotal)}</p>
+
+    <Input label="Full Name" type="text" id="full-name" />
+    <Input label="E-Mail Address" type="email" id="email" />
+    <Input label="Street" type="text" id="street" />
+
+    <div className="control-row">
+      <Input label="Postal Code" type="text" id="postal-code" />
+      <Input label="City" type="text" id="city" />
+    </div>
+  </form>
+</Modal>
+```
+
+### 12-2. Add "Close" and "Submit Order" buttons
+
+Because buttons are inside the `form` object, as default, every button clicks trigger the form submission. To prevent this behaviour, set button `type` property to `"button"` to let it use for closing modal logic.
+
+```
+<form>
+
+  ....
+
+  <p className="modal-actions">
+    <Button type="button" textOnly>Close</Button>
+    <Button>Submit Order</Button>
+  </p>
+</form>
+```
+
+### 12-3. Open and close the checkout modal logics
+
+0. `Checkout` component - receive `progress` state for opening the modal, implement `hideCheckout` method for closing the modal from `UserProgressContext`
+1. `Cart` component - implement `showCheckout` method for showing the checkout modal from `UserProgressContext`
+2. `App` component - add the `Checkout` component
+
+#### 12-3-0. `Checkout` component
+
+```
+export default function Checkout() {
+
+  ....
+
+  const userProgressCtx = useContext(UserProgressContext);
+
+  ....
+
+  /**
+   * CLOSE HANDLER
+   */
+  function handleClose() {
+    userProgressCtx.hideCheckout();
+  }
+
+  return (
+    <Modal open={userProgressCtx.progress === "checkout"}>
+      <form>
+
+       ....
+
+        <p className="modal-actions">
+          <Button type="button" textOnly onClick={handleClose}>
+            Close
+          </Button>
+          <Button>Submit Order</Button>
+        </p>
+      </form>
+    </Modal>
+  );
+}
+
+```
+
+#### 12-3-1. `Cart` component
+
+```
+/**
+  * GO TO CHECKOUT HANDLER
+  */
+function handleGoToCheckout(){
+  userProgressCtx.showCheckout();
+}
+
+return (
+  <Modal className="cart" open={userProgressCtx.progress === "cart"}>
+
+    ....
 
 
+      {cartCtx.items.length > 0 && (
+        <Button onClick={handleGoToCheckout}>Go to Checkout</Button>
+      )}
+
+    ....
+
+  </Modal>
+);
+```
+
+#### 12-3-2. `App` component
+
+```
+<UserProgressContextProvider>
+  <CartContextProvider>
+
+    ....
+
+    <Checkout />
+
+  </CartContextProvider>
+</UserProgressContextProvider>
+```

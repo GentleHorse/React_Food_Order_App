@@ -1,4 +1,5 @@
 import Cart from "./component/cart/Cart.jsx";
+import Checkout from "./component/cart/Checkout.jsx";
 import Header from "./component/header/Header.jsx";
 import Meals from "./component/meals/Meals.jsx";
 import { CartContextProvider } from "./store/CartContext.jsx";
@@ -11,6 +12,7 @@ function App() {
         <Header />
         <Meals />
         <Cart />
+        <Checkout />
       </CartContextProvider>
     </UserProgressContextProvider>
   );
