@@ -1273,3 +1273,63 @@ return (
   </CartContextProvider>
 </UserProgressContextProvider>
 ```
+
+## 13. Fixing the escape key bug of `Modal` component
+
+### 13-0. What the problem?
+Once you press the escape key to close the cart modal or checkout modal, you cannot open these modals again. This is because they open based on the `progress` state from `UserProgressContext` and if you close the modals with the escape key, that **doesn't trigger to change the `progress` state, so the state remains the same (meaning the state remains "cart" or "checkout" even though visually the modals close).**
+
+### 13-1. Fix the `Modal` component
+In order to fix this bug, set `onClose` attribute of `dialog` object.
+
+```
+export default function Modal({ .... onClose }) {
+  
+  ....
+
+  return createPortal(
+    <dialog ref={dialog} className={`modal ${className}`} onClose={onClose}>
+      {children}
+    </dialog>,
+    document.getElementById("modal")
+  );
+}
+```
+
+### 13-2. Fix the `Cart` component
+You need to pass `handleCloseCart` function **"conditionally"** to the `onClose` Modal (to be passed to `dialog` object) attribute otherwise the function also gets triggered when the user presses "Go to Checkout" button. (Because the`onClose` dialog attribute is listening the window opening state).
+
+```
+
+....
+
+function handleCloseCart() {
+  userProgressCtx.hideCart();
+}
+
+....
+
+  <Modal .... onClose={userProgressCtx.progress === "cart" ? handleCloseCart : null}>
+    
+    ....
+
+  </Modal>
+```
+
+### 13-3. Fix the `Checkout` component
+```
+
+....
+
+function handleCloseCart() {
+  userProgressCtx.hideCart();
+}
+
+....
+
+  <Modal .... onClose={handleCloseCart}>
+    
+    ....
+
+  </Modal>
+```

@@ -30,13 +30,16 @@ export default function Cart() {
   /**
    * GO TO CHECKOUT HANDLER
    */
-  function handleGoToCheckout(){
+  function handleGoToCheckout() {
     userProgressCtx.showCheckout();
   }
 
-
   return (
-    <Modal className="cart" open={userProgressCtx.progress === "cart"}>
+    <Modal
+      className="cart"
+      open={userProgressCtx.progress === "cart"}
+      onClose={userProgressCtx.progress === "cart" ? handleCloseCart : null}
+    >
       {/* TITLE */}
       <h2>Your Cart</h2>
 
