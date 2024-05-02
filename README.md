@@ -385,6 +385,7 @@ export default function Meal({ meal }) {
 ```
 
 ## 7. Creating a configurable & flexible custom button component
+
 ![reusable button component](./public/images/screenshots/reusable-button-component.png)
 
 <br>
@@ -409,9 +410,11 @@ export default function Button({ children, textOnly, className, ...props }) {
 ```
 
 ## 8. Cart context & reducer (store > `CartContext.jsx`)
+
 Cart items and related actions such as adding items, removing items, should be shared and accessed from multiple components, so better not to use `props` to pass values. Instead, using **"context API"**.
 
 ### 8-0. Create the cart context
+
 First you need to create the context with `createContext` method and prepare resuable `Provider` wrapper component.
 
 ```
@@ -424,7 +427,7 @@ const CartContext = createContext({
 });
 
 export function CartContextProvider({ children }) {
-  
+
   return <CartContext.Provider>{children}</CartContext.Provider>;
 }
 
@@ -432,6 +435,7 @@ export default CartContext;
 ```
 
 ### 8-1. With `useReducer` for the additioanl logics
+
 You can use `useState` to manage states, but with `useReducer` you can manage more complex state logics and the good point of implementing `useReducer` is that it enables to export the function outside the component.
 
 ```
@@ -451,7 +455,7 @@ const CartContext = createContext({
  */
 function cartReducer(state, action) {
   if (action.type === "ADD_ITEM") {
-    // ..... add an item 
+    // ..... add an item
   }
 
   if (action.type === "REMOVE_ITEM") {
@@ -474,6 +478,7 @@ export default CartContext;
 ```
 
 ### 8-2. Add item logic
+
 ```
 /**
  * REDUCER FUNCTION
@@ -511,7 +516,7 @@ function cartReducer(state, action) {
       });
     }
 
-    // Copy the whole state and only update the "items" array 
+    // Copy the whole state and only update the "items" array
     return { ...state, items: updatedItems };
   }
 
@@ -522,12 +527,13 @@ function cartReducer(state, action) {
 ```
 
 ### 8-3. Remove item logic
+
 ```
 /**
  * REDUCER FUNCTION
  */
 function cartReducer(state, action) {
-  
+
   ....
 
   /**
@@ -567,6 +573,7 @@ function cartReducer(state, action) {
 ### 8-4. Make the cart item logics ready to be used
 
 **CartContext.jsx**
+
 ```
 /**
  * CONTEXT PROVIDER
@@ -597,6 +604,7 @@ export function CartContextProvider({ children }) {
 ```
 
 **App.jsx**
+
 ```
 function App() {
   return (
@@ -611,6 +619,7 @@ export default App;
 ```
 
 ### 8-5. Use the cart context in `Meal.jsx`
+
 ![use context in meal component](./public/images/screenshots/use-contex-in-meal-component.png)
 
 <br>
@@ -634,7 +643,7 @@ export default function Meal({ meal }) {
       ....
 
           <Button onClick={handleAddMealToCart}>Add to Cart</Button>
-        
+
       ....
 
     </li>
@@ -643,6 +652,7 @@ export default function Meal({ meal }) {
 ```
 
 ### 8-6. Use the cart context in `Header.jsx`
+
 ![use context in header component](./public/images/screenshots/use-contex-in-header-component.png)
 
 <br>
@@ -674,3 +684,70 @@ export default function Header() {
   );
 }
 ```
+
+## 9. Reusable modal component (UI > `Modal.jsx`)
+
+### 9-0. Create the Modal component
+
+For the modal, `dialog` tag is suitable for handling such multiple purposes (like open, close the modal) and use `createPortal` to show the modal outside `root` id.
+
+```
+import { createPortal } from "react-dom";
+
+export default function Modal({ children, open }) {
+  return createPortal(
+    <dialog>{children}</dialog>,
+    document.getElementById("modal")
+  );
+}
+```
+
+### 9-1. Adding the logic to control from outside the modal
+Let outside components to control `dialog` object built-in method, `showModal()` through `open` prop.
+
+```
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+
+export default function Modal({ children, open }) {
+  const dialog = useRef();
+
+  useEffect(() => {
+    if(open){
+      dialog.current.showModal();
+    } 
+
+  }, [open])
+
+  return createPortal(
+    <dialog ref={dialog} className="modal">{children}</dialog>,
+    document.getElementById("modal")
+  );
+}
+```
+
+### 9-2. Flexible className 
+By passing className through props and using template literals to define the class name, make the style of `dialog` object flexible. Note that you need to set the default `className` prop value otherwise it will cause error.
+
+```
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+
+export default function Modal({ children, open, className = "" }) {
+  const dialog = useRef();
+
+  useEffect(() => {
+    if (open) {
+      dialog.current.showModal();
+    }
+  }, [open]);
+
+  return createPortal(
+    <dialog ref={dialog} className={`modal ${className}`}>
+      {children}
+    </dialog>,
+    document.getElementById("modal")
+  );
+}
+```
+

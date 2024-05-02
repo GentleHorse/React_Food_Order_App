@@ -13,6 +13,7 @@ const CartContext = createContext({
  * REDUCER FUNCTION
  */
 function cartReducer(state, action) {
+  
   /**
    * ADD AN ITEM
    */
