@@ -13,7 +13,6 @@ const CartContext = createContext({
  * REDUCER FUNCTION
  */
 function cartReducer(state, action) {
-  
   /**
    * ADD AN ITEM
    */
@@ -54,9 +53,9 @@ function cartReducer(state, action) {
    */
   if (action.type === "REMOVE_ITEM") {
     // Find the targent item
-    const existingCartItemIndex = state.items.findIndex((item) => {
-      item.id === action.id;
-    });
+    const existingCartItemIndex = state.items.findIndex(
+      (item) => item.id === action.id
+    );
 
     // Copy the cart items
     const updatedItems = [...state.items];
@@ -79,7 +78,8 @@ function cartReducer(state, action) {
     return { ...state, items: updatedItems };
   }
 
-  return state; // if nothing changed, return the original state
+  // if nothing changed, return the original state
+  return state;
 }
 
 /**

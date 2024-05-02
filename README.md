@@ -1008,5 +1008,91 @@ export default function Modal({ children, open, className = "" }) {
 }
 ```
 
+## 11. The cart item component
+![cart item component](./public/images/screenshots/cart-item-component.png)
+
+### 11-0. Create the cart item component
+
+```
+import { currencyFormatter } from "../../util/formatting";
+
+export default function CartItem({ name, quantity, price }) {
+  return (
+    <li className="cart-item">
+      <p>
+        {name} - {quantity} x {currencyFormatter.format(price)}
+      </p>
+      <p className="cart-item-actions">
+        <button>-</button>
+        <span>{quantity}</span>
+        <button>+</button>
+      </p>
+    </li>
+  );
+}
+```
+
+### 11-1. Use it inside the `Cart` component
+
+```
+<ul>
+  {cartCtx.items.map((item) => (
+    <CartItem
+      key={item.id}
+      name={item.name}
+      quantity={item.quantity}
+      price={item.price}
+    />
+  ))}
+</ul>
+```
+
+### 11-2. Change quantities of items inside the cart
+
+- `CartItem` component - receiving `onIncrease` & `onDecrease` props
+- `Cart` component - handling the quantity change logics
+
+<br>
+
+**CartItem.jsx**
+```
+export default function CartItem({
+  ....
+  onIncrease,
+  onDecrease,
+}) {
+  return (
+    <li className="cart-item">
+      
+      ....
+
+      <p className="cart-item-actions">
+        <button onClick={onDecrease}>-</button>
+        <span>{quantity}</span>
+        <button onClick={onIncrease}>+</button>
+      </p>
+    </li>
+  );
+}
+```
+
+<br>
+
+**Cart.jsx**
+```
+{/* MEALS */}
+<ul>
+  {cartCtx.items.map((item) => (
+    <CartItem
+      
+      ....
+
+      onIncrease={() => cartCtx.addItem(item)}
+      onDecrease={() => cartCtx.removeItem(item.id)}
+    />
+  ))}
+</ul>
+```
+
 
 
