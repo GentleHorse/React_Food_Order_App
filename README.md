@@ -751,3 +751,262 @@ export default function Modal({ children, open, className = "" }) {
 }
 ```
 
+## 10. The cart component
+
+### 10-0. Create the `Cart` component with the `Modal` component
+```
+import Modal from "../UI/Modal.jsx";
+
+export default function Cart() {
+  return (
+    <Modal className="cart">
+      <h2>Your Cart</h2>
+    </Modal>
+  );
+}
+```
+
+### 10-1. Accessing the cart context for showing the cart items
+```
+import { createContext } from "react";
+import Modal from "../UI/Modal.jsx";
+import CartContext from "../../store/CartContext.jsx";
+import { currencyFormatter } from "../../util/formatting.js";
+import Button from "../UI/Button.jsx";
+
+export default function Cart() {
+  // Fetch the cart context data
+  const cartCtx = createContext(CartContext);
+
+  // Calculate the cart total price
+  const cartTotal = cartCtx.items.reduce((totalPrice, item) => {
+    return totalPrice + item.price * item.price;
+  }, 0);
+
+  return (
+    <Modal className="cart">
+      {/* TITLE */}
+      <h2>Your Cart</h2>
+
+      {/* MEALS */}
+      <ul>
+        {cartCtx.items.map((item) => (
+          <li key={item.id}>
+            {item.name} - {item.quantity}
+          </li>
+        ))}
+      </ul>
+
+      {/* TOTAL PRICE */}
+      <p className="cart-total">{currencyFormatter.format(cartTotal)}</p>
+
+      {/* ACTION BUTTONS */}
+      <p className="modal-actions">
+        <Button textOnly>Close</Button>
+        <Button>Go to Checkout</Button>
+      </p>
+    </Modal>
+  );
+}
+```
+
+### 10-2. Create a new context for managing the modal states
+This time the context is simple, so use `useState()` instead of `useReducer()`.
+
+```
+import { createContext, useState } from "react";
+
+const UserProgressContext = createContext({
+  progress: "", // 'cart', 'checkout'
+  showCart: () => {},
+  hideCart: () => {},
+  showCheckout: () => {},
+  hideCheckout: () => {},
+});
+
+export function UserProgressContextProvider({ children }) {
+  const [userProgress, setUserProgress] = useState("");
+
+  function showCart() {
+    setUserProgress("cart");
+  }
+
+  function hideCart() {
+    setUserProgress("");
+  }
+
+  function showCheckout() {
+    setUserProgress("checkout");
+  }
+
+  function hideCheckout() {
+    setUserProgress("");
+  }
+
+  const userProgressCxt = {
+    progress: userProgress,
+    showCart: showCart,
+    hideCart: hideCart,
+    showCheckout: showCheckout,
+    hideCheckout: hideCheckout,
+  };
+
+  return (
+    <UserProgressContext.Provider value={userProgressCxt}>
+      {children}
+    </UserProgressContext.Provider>
+  );
+}
+
+export default UserProgressContext;
+```
+
+### 10-3. Make the modal open by clicking the cart button
+![open cart modal](./public/images/screenshots/open-cart-modal.png)
+
+<br>
+
+To make the modal open on request of button clicking, you need to set up the multiple components properly.
+
+0. `Header` component - handle showing the cart modal with button
+1. `Cart` component - receiving `progress` state from `UserProgressContext` for `open` attribute
+2. `App` component - wrap the related component with `UserProgressContextProvider` and added `Cart` component
+
+#### 10-3-0. `Header` component
+
+```
+export default function Header() {
+  
+  ....
+
+  const userProgressCtx = useContext(UserProgressContext);
+
+  ....
+
+  /**
+   * SHOW CART HANDLER
+   */
+  function handleShowCart() {
+    userProgressCtx.showCart();
+  }
+
+  return (
+    <header id="main-header">
+
+      ....
+
+        <Button textOnly onClick={handleShowCart}>
+          Cart ({totalCartItems})
+        </Button>
+      
+      ....
+
+    </header>
+  );
+}
+```
+
+#### 10-3-1. `Cart` component
+
+```
+export default function Cart() {
+  
+  ....
+
+  const userProgressCtx = useContext(UserProgressContext); 
+
+  ....
+
+  return (
+    <Modal className="cart" open={userProgressCtx.progress === "cart"}>
+      
+      ....
+
+    </Modal>
+  );
+}
+
+```
+
+#### 10-3-2. `App` component
+
+```
+function App() {
+  return (
+    <UserProgressContextProvider>
+      <CartContextProvider>
+        <Header />
+        <Meals />
+        <Cart />
+      </CartContextProvider>
+    </UserProgressContextProvider>
+  );
+}
+```
+
+### 10-4. Make the modal close by clicking the close button
+
+To make the modal close on request of button clicking, you need to set up the multiple components properly.
+
+0. `Cart` component - add the logic to trigger the `hideCart` method 
+1. `Modal` component - properly set up the cleaning up step of `useEffect` hook
+
+#### 10-4-0. `Cart` component
+
+```
+export default function Cart() {
+  
+  ....
+
+  const userProgressCtx = useContext(UserProgressContext); 
+
+  ....
+
+  /**
+   * CLOSE HANDLER
+   */
+  function handleCloseCart() {
+    userProgressCtx.hideCart();
+  }
+
+  return (
+    <Modal className="cart" open={userProgressCtx.progress === "cart"}>
+      
+      ....
+
+      {/* ACTION BUTTONS */}
+      <p className="modal-actions">
+        <Button textOnly onClick={handleCloseCart}>Close</Button>
+        <Button onClick={handleCloseCart}>Go to Checkout</Button>
+      </p>
+
+    </Modal>
+  );
+}
+```
+
+#### 10-4-1. `Modal` component
+
+```
+export default function Modal({ children, open, className = "" }) {
+
+  ....
+
+  useEffect(() => {
+    const modal = dialog.current;
+
+    if (open) {
+      modal.showModal();
+    }
+
+    return () => modal.close(); 
+  }, [open]);
+
+
+  ....
+
+}
+```
+
+
+

@@ -121,15 +121,8 @@ h1 {
 /*
  * CART -------------------------------
  */
-
- /* Added */ 
-.cart {
-  color: #46443c;  
-}
-
 .cart h2 {
   margin: 1rem 0;
-  font-weight: bold;  /* Added */
 }
 
 .cart ul {

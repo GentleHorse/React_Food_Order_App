@@ -1,24 +1,53 @@
+import { useContext } from "react";
+import Modal from "../UI/Modal.jsx";
+import CartContext from "../../store/CartContext.jsx";
+import { currencyFormatter } from "../../util/formatting.js";
+import Button from "../UI/Button.jsx";
+import UserProgressContext from "../../store/UserProgressContext.jsx";
+
 export default function Cart() {
+  /**
+   * CART CONTEXT & USER PROGRESS CONTEXT
+   */
+  const cartCtx = useContext(CartContext);
+  const userProgressCtx = useContext(UserProgressContext); 
+
+  /**
+   * TOTAL PRICE CALCULATION
+   */
+  const cartTotal = cartCtx.items.reduce((totalPrice, item) => {
+    return totalPrice + item.price * item.quantity;
+  }, 0);
+
+  /**
+   * CLOSE HANDLER
+   */
+  function handleCloseCart() {
+    userProgressCtx.hideCart();
+  }
+
   return (
-    <div className="cart">
+    <Modal className="cart" open={userProgressCtx.progress === "cart"}>
+      {/* TITLE */}
       <h2>Your Cart</h2>
+
+      {/* MEALS */}
       <ul>
-        <li className="cart-item">
-          <p>Dish name A - 1 x $price</p>
-          <div className="cart-item-actions">
-            <button>-</button>1<button>+</button>
-          </div>
-        </li>
-
-        <div className="cart-total">
-            $53.97
-        </div>
-
-        <div className="modal-actions">
-            <button>Close</button>
-            <button>Go to Checkout</button>
-        </div>
+        {cartCtx.items.map((item) => (
+          <li key={item.id}>
+            {item.name} - {item.quantity}
+          </li>
+        ))}
       </ul>
-    </div>
+
+      {/* TOTAL PRICE */}
+      <p className="cart-total">{currencyFormatter.format(cartTotal)}</p>
+
+      {/* ACTION BUTTONS */}
+      <p className="modal-actions">
+        <Button textOnly onClick={handleCloseCart}>Close</Button>
+        <Button onClick={handleCloseCart}>Go to Checkout</Button>
+      </p>
+    </Modal>
   );
 }
