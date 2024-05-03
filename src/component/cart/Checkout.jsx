@@ -5,7 +5,29 @@ import { currencyFormatter } from "../../util/formatting.js";
 import Input from "../UI/Input.jsx";
 import Button from "../UI/Button.jsx";
 import UserProgressContext from "../../store/UserProgressContext.jsx";
+import useHttp from "../../hook/useHttp.js";
+import Error from "../error/Error.jsx";
 
+/**
+ * AVOID INFITNITE LOOP
+ *
+ * If "requestConfig" is created inside the component,
+ * even thought it's an empty object,
+ * it's newly created everytime the component re-rendered.
+ * This cause an infinite loop,
+ * because it's one of the depedencies of useCallback in the useHttp hook.
+ * Thus, it's needed to be defined outside the component.
+ */
+const requestConfig = {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+};
+
+/**
+ * COMPONENT BODY
+ */
 export default function Checkout() {
   /**
    * CART CONTEXT & USER PROGRESS CONTEXT
@@ -28,6 +50,17 @@ export default function Checkout() {
   }
 
   /**
+   * CUSTOM HTTP HOOK
+   */
+  const {
+    data,
+    isLoading: isSending,
+    error,
+    sendRequest,
+    clearData
+  } = useHttp("http://localhost:3000/orders", requestConfig);
+
+  /**
    * FORM SUBMIT HANDLER
    */
   function handleSubmit(event) {
@@ -42,18 +75,61 @@ export default function Checkout() {
     /**
      * Send POST http request
      */
-    fetch("http://localhost:3000/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    sendRequest(
+      JSON.stringify({
         order: {
           items: cartCtx.items,
           customer: customerData,
         },
-      }),
-    });
+      })
+    );
+  }
+
+  /**
+   * FINISH SUBMISSION HANDLER
+   */
+  function handleFinish() {
+    userProgressCtx.hideCheckout();
+    cartCtx.clearCart();
+    clearData();
+  }
+
+  /**
+   * SHOW BUTTONS CONDITIONALLY
+   */
+  let actions = (
+    <>
+      <Button type="button" textOnly onClick={handleClose}>
+        Close
+      </Button>
+      <Button>Submit Order</Button>
+    </>
+  );
+
+  if (isSending) {
+    actions = <span>Sending order data .....</span>;
+  }
+
+  /**
+   * SHOW SUCCESS MESSAGE
+   */
+  if (data && !error) {
+    return (
+      <Modal
+        open={userProgressCtx.progress === "checkout"}
+        onClose={handleClose}
+      >
+        <h2>Success!</h2>
+        <p>Your order was submitted successfully.</p>
+        <p>
+          We will get back to you with more details with email within the next
+          few minutes.
+        </p>
+        <p className="modal-actions">
+          <Button onClick={handleFinish}>Okay</Button>
+        </p>
+      </Modal>
+    );
   }
 
   return (
@@ -71,12 +147,9 @@ export default function Checkout() {
           <Input label="City" type="text" id="city" />
         </div>
 
-        <p className="modal-actions">
-          <Button type="button" textOnly onClick={handleClose}>
-            Close
-          </Button>
-          <Button>Submit Order</Button>
-        </p>
+        {error && <Error title="Failed to submit order" message={error} />}
+
+        <p className="modal-actions">{actions}</p>
       </form>
     </Modal>
   );

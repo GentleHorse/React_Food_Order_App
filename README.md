@@ -1366,7 +1366,8 @@ return (
 );
 ```
 
-## 15. Sending a POST request with the order data  (`Checkout.jsx`)
+## 15. Sending a POST request with the order data (`Checkout.jsx`)
+
 ![send post http request](./public/images/screenshots/send-post-http-request.png)
 
 ```
@@ -1392,5 +1393,477 @@ function handleSubmit(event) {
       },
     }),
   });
+}
+```
+
+## 16. Create the custom hook for sending http request
+
+### 16-0. Create `useHttp` hook (hook > `useHttp.js`)
+
+- `sendHttpRequest` is the support function of the custom hook body
+- `useHttp` must handle three states - "response data" (`data`) & "loading state" (`isLoading`) & "error message" (`error`)
+- `sendRequest` must be used with `useCallback` because it's one of the dependencies of `useEffect`
+- `sendRequest` is exposed to outside the hook in case of **"POST"** request which is needed to be executed manually ("GET" request is automatically executed).
+
+```
+import { useCallback, useEffect, useState } from "react";
+
+/**
+ * SEND HTTP REQUEST
+ */
+async function sendHttpRequest(url, config) {
+  const response = await fetch(url, config);
+
+  const resData = await response.json();
+
+  // Error handling (*some error message responses are slready defined in backend)
+  if (!response.ok) {
+    throw new Error(
+      resData.message || "Something went wrong, failed to send request."
+    );
+  }
+
+  return resData;
+}
+
+/**
+ * CUSTOM HOOK
+ */
+export default function useHttp(url, config, initialData) {
+  // Response data
+  const [data, setData] = useState(initialData);
+
+  // Loading state
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Error message
+  const [error, setError] = useState();
+
+  /**
+   * Define the send request function
+   */
+  const sendRequest = useCallback(
+    async function sendRequest() {
+      setIsLoading(true); // Send the signal of "start loading"
+
+      try {
+        const resData = await sendHttpRequest(url, config);
+        setData(resData);
+      } catch (error) {
+        setError(error.message || "Something went wrong!");
+      }
+
+      setIsLoading(false); // Send the signal of "finish loading"
+    },
+    [url, config]
+  );
+
+  /**
+   * EXECUTE THE FUNCTION CONDITIONALLY
+   */
+  useEffect(() => {
+    if ((config && (config.method === "GET" || !config.method)) || !config) {
+      sendRequest();
+    }
+  }, [sendRequest, config]);
+
+  /**
+   * Expose the related data
+   */
+  return {
+    data: data,
+    isLoading: isLoading,
+    error: error,
+    sendRequest: sendRequest
+  };
+}
+```
+
+### 16-1. Use it inside the `Meals` component
+
+```
+import Meal from "./Meal.jsx";
+import useHttp from "../../hook/useHttp.js";
+
+/**
+ * AVOID INFITNITE LOOP
+ *
+ * If "requestConfig" is created inside the component,
+ * even thought it's an empty object,
+ * it's newly created everytime the component re-rendered.
+ * This cause an infinite loop,
+ * because it's one of the depedencies of useCallback in the useHttp hook.
+ * Thus, it's needed to be defined outside the component.
+ */
+const requestConfig = {};
+
+/**
+ * COMPONENT BODY
+ */
+export default function Meals() {
+
+  // Fetch meals data
+  const {
+    data: loadedMeals,
+    isLoading,
+    error,
+  } = useHttp("http://localhost:3000/meals", requestConfig, []);
+
+  // Loading message
+  if (isLoading){
+    return <p style={{textAlign: "center"}}>Fetching meals ...</p>
+  }
+
+  return (
+    <ul id="meals">
+      {loadedMeals.map((meal) => (
+        <Meal key={meal.id} meal={meal} />
+      ))}
+    </ul>
+  );
+}
+```
+
+### 16-2. Error handling inside the `Meals` component
+
+![error fetching meals](/public/images/screenshots/error-fetching-meals.png)
+
+<br>
+
+For the styling reason, create the `Error` component.
+
+<br>
+
+```
+export default function Error({ title, message }) {
+  return (
+    <div className="error-message">
+      <h2>{title}</h2>
+      <p>{message}</p>
+    </div>
+  );
+}
+```
+
+<br>
+
+Then, implement it inside the `Meals` component for error handling.
+
+<br>
+
+```
+// Error handling
+if (error){
+  return <Error title="Failed to fetch meals" message={error} />
+}
+```
+
+### 16-3. Use it inside the `Checkout` component
+
+For sending **"POST"** http request, you need to do it manually after implement the `useHttp` hook with `sendRequest` method. Like the `Meals` component, `requestConfig` should be defined outside the component for preventing an infinite loop and `sendRequest` method should be modified for accepting **"request body"** when `sendRequest` is called.
+
+#### 16-3-0. Modify `useHttp.js`
+
+- Set `data` to `sendRequest` function ----------------- (A)
+- Override `config` value ----------------- (B)
+
+```
+const sendRequest = useCallback(
+  async function sendRequest(data) {                    ----------------- (A)
+    setIsLoading(true); // Send the signal of "start loading"
+
+    try {
+      const resData = await sendHttpRequest(url, {      ----------------- (B)
+        ...config,
+        body: data,
+      });
+      setData(resData);
+    } catch (error) {
+      setError(error.message || "Something went wrong!");
+    }
+
+    setIsLoading(false); // Send the signal of "finish loading"
+  },
+  [url, config]
+);
+```
+
+#### 16-3-1. `Checkout.jsx`
+
+```
+const requestConfig = {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+};
+
+/**
+ * COMPONENT BODY
+ */
+export default function Checkout() {
+
+  ....
+
+  /**
+   * CUSTOM HTTP HOOK
+   */
+  const { data, isLoading, error, sendRequest } = useHttp(
+    "http://localhost:3000/orders",
+    requestConfig
+  );
+
+  /**
+   * FORM SUBMIT HANDLER
+   */
+  function handleSubmit(event) {
+
+    ....
+
+    /**
+     * Handle the input data
+     */
+    const fd = new FormData(event.target);
+    const customerData = Object.fromEntries(fd.entries()); // Returns key-value pairs
+
+    /**
+     * Send POST http request
+     */
+    sendRequest(
+      JSON.stringify({
+        order: {
+          items: cartCtx.items,
+          customer: customerData,
+        },
+      })
+    );
+  }
+
+
+  ....
+
+}
+```
+
+### 16-4. UI while sending data (`Checkout.jsx`)
+
+![sending order](./public/images/screenshots/sending-order.png)
+
+<br>
+
+```
+let actions = (
+  <>
+    <Button type="button" textOnly onClick={handleClose}>
+      Close
+    </Button>
+    <Button>Submit Order</Button>
+  </>
+);
+
+if (isSending) {
+  actions = <span>Sending order data .....</span>;
+}
+
+return (
+  <Modal open={userProgressCtx.progress === "checkout"} onClose={handleClose}>
+
+      ....
+
+      <p className="modal-actions">{actions}</p>
+
+      ....
+
+  </Modal>
+);
+```
+
+### 16-5. Error handling (`Checkout.jsx`)
+
+![failed to submit order](./public/images/screenshots/fail-to-submit-order.png)
+
+```
+{error && <Error title="Failed to submit order" message={error} />}
+```
+
+### 16-6. Show a success message (`Checkout.jsx`)
+
+![success message](./public/images/screenshots/success-message.png)
+
+```
+if (data && !error) {
+  return (
+    <Modal
+      open={userProgressCtx.progress === "checkout"}
+      onClose={handleClose}
+    >
+      <h2>Success!</h2>
+      <p>Your order was submitted successfully.</p>
+      <p>
+        We will get back to you with more details with email within the next
+        few minutes.
+      </p>
+      <p className="modal-actions">
+        <Button onClick={handleClose}>Okay</Button>
+      </p>
+    </Modal>
+  );
+}
+```
+
+### 16-7. Add clear inside the cart logic  (`CartContext.jsx`)
+
+```
+import { createContext, useReducer } from "react";
+
+/**
+ * CONTEXT OBJECT
+ */
+const CartContext = createContext({
+ 
+ ....
+
+  clearCart: () => {},
+});
+
+/**
+ * REDUCER FUNCTION
+ */
+function cartReducer(state, action) {
+  
+  ....
+
+  /**
+   * CLEAR THE CART ITEMS
+   */
+  if (action.type === "CLEAR_CART") {
+    return { ...state, items: [] };
+  }
+
+
+  ....
+}
+
+/**
+ * CONTEXT PROVIDER
+ */
+export function CartContextProvider({ children }) {
+  
+  ....
+
+  function clearCart() {
+    dispatchCartAction({ type: "CLEAR_CART" });
+  }
+
+  // Cart context values
+  const cartContext = {
+    
+    ....
+
+    clearCart: clearCart,
+  };
+
+  return (
+    <CartContext.Provider value={cartContext}>{children}</CartContext.Provider>
+  );
+}
+
+export default CartContext;
+```
+
+### 16-8. Clear inside the cart after submission (`Checkout.jsx`)
+
+```
+/**
+  * FINISH SUBMISSION HANDLER
+  */
+function handleFinish() {
+  userProgressCtx.hideCheckout();
+  cartCtx.clearCart();
+}
+
+....
+
+/**
+  * SHOW SUCCESS MESSAGE
+  */
+if (data && !error) {
+  return (
+    <Modal
+      open={userProgressCtx.progress === "checkout"}
+      onClose={handleClose}
+    >
+      ....
+
+        <Button onClick={handleFinish}>Okay</Button>
+      
+
+      ....
+
+    </Modal>
+  );
+}
+```
+
+### 16-9. Fix the submission bug (`useHttp.js` & `Checkout.jsx`)
+
+#### 16-9-0. What's the issue?
+Once you submit the order, and then try to submit the new order, you cannot do this because **"the order never get reset"**. Thus, we need to implement the way to reset it.
+
+#### 16-9-1. Solution
+
+**useHttp.js**
+```
+export default function useHttp(url, config, initialData) {
+  // Response data
+  const [data, setData] = useState(initialData);
+
+  ....
+
+  /**
+   * Clear the order data
+   */
+  function clearData() {
+    setData(initialData);
+  }
+
+  ....
+
+  /**
+   * Expose the related data
+   */
+  return {
+    
+    ....
+
+    clearData: clearData
+  };
+}
+```
+
+<br>
+
+**Checkout.jsx**
+```
+/**
+  * CUSTOM HTTP HOOK
+  */
+const {
+  
+  ....
+
+  clearData
+} = useHttp("http://localhost:3000/orders", requestConfig);
+
+....
+
+/**
+  * FINISH SUBMISSION HANDLER
+  */
+function handleFinish() {
+  
+  ....
+
+  clearData();
 }
 ```

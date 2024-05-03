@@ -1,30 +1,40 @@
-import { useState, useEffect } from "react";
 import Meal from "./Meal.jsx";
+import useHttp from "../../hook/useHttp.js";
+import Error from "../error/Error.jsx";
 
+/**
+ * AVOID INFITNITE LOOP
+ * 
+ * If "requestConfig" is created inside the component,
+ * even thought it's an empty object,
+ * it's newly created everytime the component re-rendered.
+ * This cause an infinite loop,
+ * because it's one of the depedencies of useCallback in the useHttp hook.
+ * Thus, it's needed to be defined outside the component.
+ */
+const requestConfig = {};
+
+/**
+ * COMPONENT BODY
+ */
 export default function Meals() {
-  const [loadedMeals, setLoadedMeals] = useState([]);
-  const [error, setError] = useState();
 
-  useEffect(() => {
-    async function fetchMeals() {
-      try {
-        const response = await fetch("http://localhost:3000/meals");
-        const resData = await response.json();
+  // Fetch meals data
+  const {
+    data: loadedMeals,
+    isLoading,
+    error,
+  } = useHttp("http://localhost:3000/meals", requestConfig, []);
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch meals");
-        }
+  // Loading message
+  if (isLoading){
+    return <p style={{textAlign: "center"}}>Fetching meals ...</p>
+  }
 
-        setLoadedMeals(resData);
-      } catch (error) {
-        setError({
-          message: "Failed to fetch meals",
-        });
-      }
-    }
-
-    fetchMeals();
-  }, []);
+  // Error handling
+  if (error){
+    return <Error title="Failed to fetch meals" message={error} />
+  }
 
   return (
     <ul id="meals">
