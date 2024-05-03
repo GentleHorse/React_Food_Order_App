@@ -5,7 +5,7 @@ export default function Modal({ children, open, onClose, className = "" }) {
   const dialog = useRef();
 
   useEffect(() => {
-    const modal = dialog.current;  // Lock in the value (recommended way)
+    const modal = dialog.current;  // Lock-in the value (recommended way)
 
     if (open) {
       modal.showModal();

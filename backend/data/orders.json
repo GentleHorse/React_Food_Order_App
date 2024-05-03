@@ -1,1 +1,90 @@
-[]
+[
+  {
+    "items": [
+      {
+        "id": "m1",
+        "name": "Mac & Cheese",
+        "price": "8.99",
+        "description": "Creamy cheddar cheese mixed with perfectly cooked macaroni, topped with crispy breadcrumbs. A classic comfort food.",
+        "image": "images/mac-and-cheese.jpg",
+        "quantity": 1
+      },
+      {
+        "id": "m3",
+        "name": "Caesar Salad",
+        "price": "7.99",
+        "description": "Romaine lettuce tossed in Caesar dressing, topped with croutons and parmesan shavings.",
+        "image": "images/caesar-salad.jpg",
+        "quantity": 2
+      },
+      {
+        "id": "m5",
+        "name": "Veggie Burger",
+        "price": "9.99",
+        "description": "A juicy veggie patty served on a whole grain bun with lettuce, tomato, and a tangy sauce.",
+        "image": "images/veggie-burger.jpg",
+        "quantity": 1
+      },
+      {
+        "id": "m8",
+        "name": "Sushi Roll Platter",
+        "price": "15.99",
+        "description": "An assortment of fresh sushi rolls including California, Spicy Tuna, and Eel Avocado.",
+        "image": "images/sushi-roll-platter.jpg",
+        "quantity": 1
+      }
+    ],
+    "customer": {
+      "name": "John Doe",
+      "email": "john@doe.com",
+      "street": "221B Baker Street",
+      "postal-code": "NW1 6XE",
+      "city": "Lond"
+    },
+    "id": "463.4462894045355"
+  },
+  {
+    "items": [
+      {
+        "id": "m1",
+        "name": "Mac & Cheese",
+        "price": "8.99",
+        "description": "Creamy cheddar cheese mixed with perfectly cooked macaroni, topped with crispy breadcrumbs. A classic comfort food.",
+        "image": "images/mac-and-cheese.jpg",
+        "quantity": 1
+      },
+      {
+        "id": "m3",
+        "name": "Caesar Salad",
+        "price": "7.99",
+        "description": "Romaine lettuce tossed in Caesar dressing, topped with croutons and parmesan shavings.",
+        "image": "images/caesar-salad.jpg",
+        "quantity": 2
+      },
+      {
+        "id": "m5",
+        "name": "Veggie Burger",
+        "price": "9.99",
+        "description": "A juicy veggie patty served on a whole grain bun with lettuce, tomato, and a tangy sauce.",
+        "image": "images/veggie-burger.jpg",
+        "quantity": 1
+      },
+      {
+        "id": "m8",
+        "name": "Sushi Roll Platter",
+        "price": "15.99",
+        "description": "An assortment of fresh sushi rolls including California, Spicy Tuna, and Eel Avocado.",
+        "image": "images/sushi-roll-platter.jpg",
+        "quantity": 1
+      }
+    ],
+    "customer": {
+      "name": "John Doe",
+      "email": "john@doe.com",
+      "street": "221B Baker Street",
+      "postal-code": "NW1 6XE",
+      "city": "London"
+    },
+    "id": "958.9361890016745"
+  }
+]

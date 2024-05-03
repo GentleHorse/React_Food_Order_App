@@ -1104,6 +1104,7 @@ export default function CartItem({
 ```
 
 ## 12. The checkout modal component
+
 ![checkout modal component](./public/images/screenshots/checkout-modal-component.png)
 
 ### 12-0. Create the `Checkout` component with the `Modal` component
@@ -1277,14 +1278,16 @@ return (
 ## 13. Fixing the escape key bug of `Modal` component
 
 ### 13-0. What the problem?
+
 Once you press the escape key to close the cart modal or checkout modal, you cannot open these modals again. This is because they open based on the `progress` state from `UserProgressContext` and if you close the modals with the escape key, that **doesn't trigger to change the `progress` state, so the state remains the same (meaning the state remains "cart" or "checkout" even though visually the modals close).**
 
 ### 13-1. Fix the `Modal` component
+
 In order to fix this bug, set `onClose` attribute of `dialog` object.
 
 ```
 export default function Modal({ .... onClose }) {
-  
+
   ....
 
   return createPortal(
@@ -1297,6 +1300,7 @@ export default function Modal({ .... onClose }) {
 ```
 
 ### 13-2. Fix the `Cart` component
+
 You need to pass `handleCloseCart` function **"conditionally"** to the `onClose` Modal (to be passed to `dialog` object) attribute otherwise the function also gets triggered when the user presses "Go to Checkout" button. (Because the`onClose` dialog attribute is listening the window opening state).
 
 ```
@@ -1310,13 +1314,14 @@ function handleCloseCart() {
 ....
 
   <Modal .... onClose={userProgressCtx.progress === "cart" ? handleCloseCart : null}>
-    
+
     ....
 
   </Modal>
 ```
 
 ### 13-3. Fix the `Checkout` component
+
 ```
 
 ....
@@ -1328,8 +1333,64 @@ function handleCloseCart() {
 ....
 
   <Modal .... onClose={handleCloseCart}>
-    
+
     ....
 
   </Modal>
+```
+
+## 14. Handling the form submission and validation (`Checkout.jsx`)
+
+```
+/**
+  * FORM SUBMIT HANDLER
+  */
+function handleSubmit(event) {
+  event.preventDefault();   // Cancel the default webpage submission behaviour
+
+  /**
+    * Handle the input data
+    */
+  const fd = new FormData(event.target);
+  const customerData = Object.fromEntries(fd.entries());  // Returns key-value pairs
+}
+
+return (
+  <Modal open={userProgressCtx.progress === "checkout"} onClose={handleClose}>
+    <form onSubmit={handleSubmit}>
+
+      ....
+
+    </form>
+  </Modal>
+);
+```
+
+## 15. Sending a POST request with the order data  (`Checkout.jsx`)
+![send post http request](./public/images/screenshots/send-post-http-request.png)
+
+```
+/**
+  * FORM SUBMIT HANDLER
+  */
+function handleSubmit(event) {
+
+  ....
+
+  /**
+    * Send POST http request
+    */
+  fetch("http://localhost:3000/orders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      order: {
+        items: cartCtx.items,
+        customer: customerData,
+      },
+    }),
+  });
+}
 ```
